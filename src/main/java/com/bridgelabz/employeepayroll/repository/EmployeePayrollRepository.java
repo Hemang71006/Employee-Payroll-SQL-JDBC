@@ -4,6 +4,7 @@ import com.bridgelabz.employeepayroll.exception.EmployeePayrollException;
 import com.bridgelabz.employeepayroll.model.EmployeePayrollData;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +13,19 @@ public class EmployeePayrollRepository {
     private static final String JDBC_USER = "root";
     private static final String JDBC_PASSWORD = System.getenv("DB_PASSWORD");
 
+    private PreparedStatement getEmployeeByNameStatement;
+
     public Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            return DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+            Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+            // Prepare and cache the PreparedStatement for fetching by name
+            if (getEmployeeByNameStatement == null) {
+                getEmployeeByNameStatement = conn.prepareStatement("SELECT * FROM employee_payroll WHERE name = ?");
+            }
+            return conn;
         } catch (ClassNotFoundException | SQLException e) {
-            throw new EmployeePayrollException("Database connection failed!", e);
+            throw new EmployeePayrollException("Database connection or statement preparation failed!", e);
         }
     }
 
@@ -30,24 +38,44 @@ public class EmployeePayrollRepository {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                double salary = rs.getDouble("salary");
-                Date start = rs.getDate("start");
-
-                EmployeePayrollData emp = new EmployeePayrollData(
-                        id,
-                        name,
-                        salary,
-                        start != null ? start.toLocalDate() : null
-                );
-                employeeList.add(emp);
+                employeeList.add(mapResultSetToEmployee(rs));
             }
         } catch (SQLException e) {
-            throw new EmployeePayrollException("Error while reading employee payroll data from database", e);
+            throw new EmployeePayrollException("Error while reading employee payroll data", e);
         }
         return employeeList;
     }
+
+    public EmployeePayrollData getEmployeePayrollDataByName(String name) {
+        try (Connection conn = getConnection()) {
+            getEmployeeByNameStatement = conn.prepareStatement("SELECT * FROM employee_payroll WHERE name = ?");
+            getEmployeeByNameStatement.setString(1, name);
+
+            try (ResultSet rs = getEmployeeByNameStatement.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToEmployee(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new EmployeePayrollException("Error retrieving employee by name: " + name, e);
+        }
+        return null;
+    }
+
+    private EmployeePayrollData mapResultSetToEmployee(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String empName = rs.getString("name");
+        double salary = rs.getDouble("salary");
+        Date start = rs.getDate("start");
+
+        return new EmployeePayrollData(
+                id,
+                empName,
+                salary,
+                start != null ? start.toLocalDate() : null
+        );
+    }
+
     public int updateEmployeeSalary(String name, double salary) {
         String sql = "UPDATE employee_payroll SET salary = ? WHERE name = ?";
         try (Connection conn = getConnection();
@@ -55,11 +83,10 @@ public class EmployeePayrollRepository {
 
             pstmt.setDouble(1, salary);
             pstmt.setString(2, name);
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected;
+            return pstmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new EmployeePayrollException("Error updating employee salary: " + e.getMessage(), e);
+            throw new EmployeePayrollException("Error updating employee salary", e);
         }
     }
 }

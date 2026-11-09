@@ -3,24 +3,20 @@ package com.bridgelabz.employeepayroll;
 import com.bridgelabz.employeepayroll.model.EmployeePayrollData;
 import com.bridgelabz.employeepayroll.service.EmployeePayrollService;
 
-import java.util.List;
-
 public class EmployeePayrollMain {
     public static void main(String[] args) {
-        EmployeePayrollService service = new EmployeePayrollService();
+        // Obtain Singleton instance
+        EmployeePayrollService service = EmployeePayrollService.getInstance();
 
-        System.out.println("--- Before Salary Update ---");
+        System.out.println("--- Fetching All Employee Records ---");
         service.readEmployeePayrollData().forEach(System.out::println);
 
-        System.out.println("\n--- Updating Terisa's Salary to 3,000,000.00 (UC 3) ---");
-        boolean isUpdated = service.updateEmployeeSalary("Terisa", 3000000.00);
-
-        if (isUpdated) {
-            System.out.println("Salary updated successfully in database.");
+        System.out.println("\n--- Fetching Employee Payroll Data by Name 'Terisa' (Refactor UC 4) ---");
+        EmployeePayrollData terisa = service.getEmployeePayrollDataByName("Terisa");
+        if (terisa != null) {
+            System.out.println("Found: " + terisa);
+        } else {
+            System.out.println("Employee not found.");
         }
-
-        System.out.println("\n--- After Salary Update ---");
-        List<EmployeePayrollData> employees = service.readEmployeePayrollData();
-        employees.forEach(System.out::println);
     }
 }
