@@ -110,4 +110,34 @@ public class EmployeePayrollRepository {
         }
         return employeeList;
     }
+
+    public void printSalaryStatisticsByGender() {
+        String sql = "SELECT gender, SUM(salary) as total_salary, AVG(salary) as avg_salary, " +
+                "MIN(salary) as min_salary, MAX(salary) as max_salary, COUNT(*) as emp_count " +
+                "FROM employee_payroll GROUP BY gender";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.println("\n--- Salary Statistics by Gender (UC 6) ---");
+            while (rs.next()) {
+                String gender = rs.getString("gender");
+                double totalSalary = rs.getDouble("total_salary");
+                double avgSalary = rs.getDouble("avg_salary");
+                double minSalary = rs.getDouble("min_salary");
+                double maxSalary = rs.getDouble("max_salary");
+                int count = rs.getInt("emp_count");
+
+                System.out.println("Gender: " + (gender != null ? gender : "N/A") +
+                        " | Count: " + count +
+                        " | Sum: " + totalSalary +
+                        " | Avg: " + avgSalary +
+                        " | Min: " + minSalary +
+                        " | Max: " + maxSalary);
+            }
+        } catch (SQLException e) {
+            throw new EmployeePayrollException("Error calculating aggregate statistics by gender", e);
+        }
+    }
 }

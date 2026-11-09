@@ -37,4 +37,8 @@ public class EmployeePayrollService {
     public List<EmployeePayrollData> getEmployeesForDateRange(LocalDate startDate, LocalDate endDate) {
         return repository.getEmployeesForDateRange(startDate, endDate);
     }
+
+    public void printSalaryStatisticsByGender() {
+        repository.printSalaryStatisticsByGender();
+    }
 }
