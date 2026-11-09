@@ -48,4 +48,18 @@ public class EmployeePayrollRepository {
         }
         return employeeList;
     }
+    public int updateEmployeeSalary(String name, double salary) {
+        String sql = "UPDATE employee_payroll SET salary = ? WHERE name = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDouble(1, salary);
+            pstmt.setString(2, name);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected;
+
+        } catch (SQLException e) {
+            throw new EmployeePayrollException("Error updating employee salary: " + e.getMessage(), e);
+        }
+    }
 }

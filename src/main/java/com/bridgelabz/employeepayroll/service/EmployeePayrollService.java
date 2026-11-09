@@ -11,4 +11,9 @@ public class EmployeePayrollService {
     public List<EmployeePayrollData> readEmployeePayrollData() {
         return repository.getEmployeePayrollData();
     }
+
+    public boolean updateEmployeeSalary(String name, double salary) {
+        int rowsUpdated = repository.updateEmployeeSalary(name, salary);
+        return rowsUpdated > 0;
+    }
 }
