@@ -2,7 +2,7 @@ package com.bridgelabz.employeepayroll.service;
 
 import com.bridgelabz.employeepayroll.model.EmployeePayrollData;
 import com.bridgelabz.employeepayroll.repository.EmployeePayrollRepository;
-
+import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeePayrollService {
@@ -32,5 +32,9 @@ public class EmployeePayrollService {
     public boolean updateEmployeeSalary(String name, double salary) {
         int rowsUpdated = repository.updateEmployeeSalary(name, salary);
         return rowsUpdated > 0;
+    }
+
+    public List<EmployeePayrollData> getEmployeesForDateRange(LocalDate startDate, LocalDate endDate) {
+        return repository.getEmployeesForDateRange(startDate, endDate);
     }
 }

@@ -89,4 +89,25 @@ public class EmployeePayrollRepository {
             throw new EmployeePayrollException("Error updating employee salary", e);
         }
     }
+
+    public List<EmployeePayrollData> getEmployeesForDateRange(LocalDate startDate, LocalDate endDate) {
+        List<EmployeePayrollData> employeeList = new ArrayList<>();
+        String sql = "SELECT * FROM employee_payroll WHERE start BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, startDate.toString());
+            pstmt.setString(2, endDate.toString());
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    employeeList.add(mapResultSetToEmployee(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new EmployeePayrollException("Error retrieving employees for date range", e);
+        }
+        return employeeList;
+    }
 }
