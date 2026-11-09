@@ -114,7 +114,3 @@ mvn clean compile exec:java -Dexec.mainClass="com.bridgelabz.employeepayroll.Emp
 gradle run
 
 ```
-
-```
-
-```
