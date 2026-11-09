@@ -1,21 +1,16 @@
 package com.bridgelabz.employeepayroll;
 
-import com.bridgelabz.employeepayroll.repository.EmployeePayrollRepository;
+import com.bridgelabz.employeepayroll.model.EmployeePayrollData;
+import com.bridgelabz.employeepayroll.service.EmployeePayrollService;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.List;
 
 public class EmployeePayrollMain {
     public static void main(String[] args) {
-        EmployeePayrollRepository repository = new EmployeePayrollRepository();
+        EmployeePayrollService service = new EmployeePayrollService();
 
-        System.out.println("--- Testing Database Connectivity (UC 1) ---");
-        try (Connection conn = repository.connectToDatabase()) {
-            if (conn != null) {
-                System.out.println("Database connection verified and closed safely.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        System.out.println("--- Retrieving Employee Payroll Data (UC 2) ---");
+        List<EmployeePayrollData> employeePayrollData = service.readEmployeePayrollData();
+        employeePayrollData.forEach(System.out::println);
     }
 }
